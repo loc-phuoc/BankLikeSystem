@@ -132,4 +132,56 @@ router.post('/withdraw', withdraw);
  */
 router.post('/transfer', transfer);
 
+/**
+ * @swagger
+ * /transactions/{address}:
+ *   get:
+ *     summary: Get transaction history
+ *     description: Returns the transaction history of a blockchain address
+ *     tags: [Transactions]
+ *     parameters:
+ *       - in: path
+ *         name: address
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Blockchain address to get transactions for
+ *     responses:
+ *       200:
+ *         description: Transaction history
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 address:
+ *                   type: string
+ *                   example: 0x123...
+ *                 transactionCount:
+ *                   type: number
+ *                   example: 10
+ *                 transactions:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       type:
+ *                         type: string
+ *                         enum: [deposit, withdraw, transfer-in, transfer-out]
+ *                       amount:
+ *                         type: string
+ *                         example: 50
+ *                       txHash:
+ *                         type: string
+ *                         example: 0xabc...
+ *                       timestamp:
+ *                         type: string
+ *                         format: date-time
+ *       400:
+ *         description: Invalid input
+ *       500:
+ *         description: Server error
+ */
+router.get('/transactions/:address', getTransactionHistory);
+
 export default router;

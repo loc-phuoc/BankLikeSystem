@@ -1,7 +1,7 @@
 import { web3 } from '../config/blockchain.js';
 import env from '../config/env.js';
 import { getTokenBalance, transferTokens, approveSpender } from '../models/tokenModel.js';
-import { depositToUser, withdrawFromUser } from '../models/bankModel.js';
+import { depositToUser, withdrawFromUser, getAccountTransactions } from '../models/bankModel.js';
 import { checkUserExists } from '../models/userModel.js';
 
 export async function deposit(req, res) {
@@ -157,5 +157,27 @@ export async function transfer(req, res) {
   } catch (error) {
     console.error('Error during transfer:', error.message);
     res.status(500).json({ error: 'Failed to transfer tokens' });
+  }
+}
+
+export async function getTransactionHistory(req, res) {
+  try {
+    const { address } = req.params;
+    
+    if (!address) {
+      return res.status(400).json({ error: 'Address is required' });
+    }
+    
+    // Get transaction history
+    const transactions = await getAccountTransactions(address);
+    
+    res.json({
+      address,
+      transactionCount: transactions.length,
+      transactions
+    });
+  } catch (error) {
+    console.error('Error fetching transaction history:', error.message);
+    res.status(500).json({ error: 'Failed to get transaction history' });
   }
 }
