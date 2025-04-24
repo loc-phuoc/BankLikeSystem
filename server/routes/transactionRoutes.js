@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { deposit, withdraw, transfer } from '../controllers/transactionController.js';
+import { deposit, withdraw, transfer, getTransactionHistory } from '../controllers/transactionController.js';
 
 const router = Router();
 
