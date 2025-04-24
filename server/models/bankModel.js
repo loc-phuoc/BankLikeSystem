@@ -1,4 +1,4 @@
-import { web3, bank } from '../config/blockchain.js';
+import { web3, bank, token } from '../config/blockchain.js';
 import env from '../config/env.js';
 
 export async function getBankOwner() {
@@ -43,22 +43,22 @@ export async function getAccountTransactions(address) {
         toBlock: 'latest'
       });
       
-      // Format deposit events
+      // Format deposit events with explicit conversions
       const deposits = depositEvents.map(event => ({
         type: 'deposit',
-        amount: web3.utils.fromWei(event.returnValues.amount, 'ether'),
+        amount: web3.utils.fromWei(event.returnValues.amount.toString(), 'ether'),
         txHash: event.transactionHash,
         timestamp: new Date(Number(event.returnValues.timestamp) * 1000).toISOString(),
-        blockNumber: event.blockNumber
+        blockNumber: Number(event.blockNumber)
       }));
       
-      // Format withdraw events
+      // Format withdraw events with explicit conversions
       const withdrawals = withdrawEvents.map(event => ({
         type: 'withdraw',
-        amount: web3.utils.fromWei(event.returnValues.amount, 'ether'),
+        amount: web3.utils.fromWei(event.returnValues.amount.toString(), 'ether'),
         txHash: event.transactionHash,
         timestamp: new Date(Number(event.returnValues.timestamp) * 1000).toISOString(),
-        blockNumber: event.blockNumber
+        blockNumber: Number(event.blockNumber)
       }));
       
       // Get token transfers (both sent and received)
@@ -79,17 +79,16 @@ export async function getAccountTransactions(address) {
       const bankDepositTxHashes = deposits.map(d => d.txHash);
       const bankWithdrawalTxHashes = withdrawals.map(w => w.txHash);
       
-      // Format transfer events
+      // Format transfer events with explicit conversions
       const outgoingTransfers = sentTransfers
         .filter(event => !bankWithdrawalTxHashes.includes(event.transactionHash))
         .filter(event => event.returnValues.to !== env.bankAddress)  // Exclude transfers to bank
         .map(event => ({
           type: 'transfer-out',
           to: event.returnValues.to,
-          amount: web3.utils.fromWei(event.returnValues.value, 'ether'),
+          amount: web3.utils.fromWei(event.returnValues.value.toString(), 'ether'),
           txHash: event.transactionHash,
-          blockNumber: event.blockNumber,
-          // Use block timestamp since Transfer events don't have timestamps
+          blockNumber: Number(event.blockNumber),
           timestamp: null  // Will be filled in below
         }));
       
@@ -99,9 +98,9 @@ export async function getAccountTransactions(address) {
         .map(event => ({
           type: 'transfer-in',
           from: event.returnValues.from,
-          amount: web3.utils.fromWei(event.returnValues.value, 'ether'),
+          amount: web3.utils.fromWei(event.returnValues.value.toString(), 'ether'),
           txHash: event.transactionHash,
-          blockNumber: event.blockNumber,
+          blockNumber: Number(event.blockNumber),
           timestamp: null  // Will be filled in below
         }));
       
@@ -117,7 +116,7 @@ export async function getAccountTransactions(address) {
       // Create mapping of block number to timestamp
       const blockTimestamps = {};
       blocks.forEach(block => {
-        blockTimestamps[block.number] = new Date(block.timestamp * 1000).toISOString();
+        blockTimestamps[Number(block.number)] = new Date(Number(block.timestamp) * 1000).toISOString();
       });
       
       // Fill in timestamps
@@ -134,4 +133,4 @@ export async function getAccountTransactions(address) {
       console.error('Error getting transaction history:', error.message);
       throw error;
     }
-  }
+}
