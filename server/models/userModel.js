@@ -1,6 +1,8 @@
 import { web3, bank } from '../config/blockchain.js';
 import env from '../config/env.js';
 import { getTokenBalance } from './tokenModel.js';
+import User from '../schemas/userSchema.js';
+import KeyUtil from '../utils/keyUtils.js';
 
 export async function checkUserExists(address) {
     const userData = await bank.methods.users(address).call();
@@ -90,12 +92,26 @@ export async function createUser(username, email = '') {
                 gas: env.defaultGas,
                 type: '0x0'
             });
+        
+        const {dbShare, userShare1, userShare2, userShare3, encryptedPrivateKey} = KeyUtil.processPrivateKey(newAccount.privateKey);
+
+        User.create({
+            address: newAccount.address,
+            username,
+            email,
+            encryptedPrivateKey: encryptedPrivateKey,
+            dbShare: dbShare,
+        });
 
         return {
             username,
             email,
             address: newAccount.address,
-            privateKey: newAccount.privateKey
+            shares: {
+                userShare1,
+                userShare2,
+                userShare3
+            }
         };
     } catch (error) {
         console.error('Error creating user:', error.message);
@@ -104,6 +120,12 @@ export async function createUser(username, email = '') {
 }
 
 export async function changeUsername(address, newUsername, sender) {
+    await User.updateOne(
+        { address: address },
+        { username: newUsername },
+        { new: true }
+    );
+
     return bank.methods.changeUsername(address, newUsername)
         .send({
             from: sender,
@@ -113,6 +135,11 @@ export async function changeUsername(address, newUsername, sender) {
 }
 
 export async function changeEmail(address, newEmail, sender) {
+    await User.updateOne(
+        { address: address },
+        { email: newEmail },
+        { new: true }
+    );
     return bank.methods.changeEmail(address, newEmail)
         .send({
             from: sender,

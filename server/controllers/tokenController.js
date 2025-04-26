@@ -1,27 +1,21 @@
-import { getTokenInfo as getTokenInfoModel, getTokenBalance } from '../models/tokenModel.js';
+// --- controllers/tokenController.js ---
+import TokenService from '../services/tokenService.js';
 
 export async function getToken(req, res) {
   try {
-    const tokenInfo = await getTokenInfoModel();
+    const tokenInfo = await TokenService.handleGetTokenInfo();
     res.json(tokenInfo);
   } catch (error) {
-    console.error('Error getting token info:', error.message);
-    res.status(500).json({ error: 'Failed to get token information' });
+    res.status(error.status || 500).json({ error: error.message });
   }
 }
 
 export async function getBalance(req, res) {
   try {
     const { address } = req.params;
-    
-    const balance = await getTokenBalance(address);
-    
-    res.json({
-      address,
-      balance: req.web3.utils.fromWei(balance, 'ether')
-    });
+    const balanceInfo = await TokenService.handleGetBalance(address);
+    res.json(balanceInfo);
   } catch (error) {
-    console.error('Error getting balance:', error.message);
-    res.status(500).json({ error: 'Failed to get token balance' });
+    res.status(error.status || 500).json({ error: error.message });
   }
 }

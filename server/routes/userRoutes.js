@@ -5,7 +5,8 @@ import {
   getUsers, 
   findUserByUsername,
   changeUsername,
-  changeEmail
+  changeEmail,
+  regainShare
 } from '../controllers/userController.js';
 
 const router = Router();
@@ -183,9 +184,9 @@ router.get('/users/username/:username', findUserByUsername);
  *               newUsername:
  *                 type: string
  *                 description: New username for the user
- *               privateKey:
+ *               share:
  *                 type: string
- *                 description: Private key for transaction signing (optional if using owner)
+ *                 description: share for transaction signing (optional if using owner)
  *     responses:
  *       200:
  *         description: Username updated successfully
@@ -205,7 +206,7 @@ router.get('/users/username/:username', findUserByUsername);
  *       400:
  *         description: Invalid input
  *       403:
- *         description: Private key does not match address
+ *         description: share does not match address
  *       404:
  *         description: User not found
  *       500:
@@ -239,21 +240,94 @@ router.put('/users/:address/username', changeUsername);
  *               newEmail:
  *                 type: string
  *                 description: New email for the user
- *               privateKey:
+ *               share:
  *                 type: string
- *                 description: Private key for transaction signing (optional if using owner)
+ *                 description: share for transaction signing (optional if using owner)
  *     responses:
  *       200:
  *         description: Email updated successfully
  *       400:
  *         description: Invalid input
  *       403:
- *         description: Private key does not match address
+ *         description: share does not match address
  *       404:
  *         description: User not found
  *       500:
  *         description: Server error
  */
 router.put('/users/:address/email', changeEmail);
+
+/**
+ * @swagger
+ * /users/regain-share:
+ *   post:
+ *     summary: Regain private key shares
+ *     description: Reconstructs private key shares from a user share and database share
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - address
+ *               - share
+ *             properties:
+ *               address:
+ *                 type: string
+ *                 description: Blockchain address of the user
+ *               share:
+ *                 type: string
+ *                 description: One of the user's key shares
+ *     responses:
+ *       200:
+ *         description: Shares successfully reconstructed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 username:
+ *                   type: string
+ *                   example: alice
+ *                 email:
+ *                   type: string
+ *                   example: alice@example.com
+ *                 address:
+ *                   type: string
+ *                   example: 0x1234...5678
+ *                 shares:
+ *                   type: object
+ *                   properties:
+ *                     userShare1:
+ *                       type: string
+ *                       example: abc123...
+ *                     userShare2:
+ *                       type: string
+ *                       example: def456...
+ *                     userShare3:
+ *                       type: string
+ *                       example: ghi789...
+ *       400:
+ *         description: Invalid input
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.post('/users/regain-share', regainShare);
 
 export default router;

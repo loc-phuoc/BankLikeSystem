@@ -17,6 +17,13 @@ const web3 = new Web3(env.rpcUrl, {
 const bank = new web3.eth.Contract(BankABI, env.bankAddress);
 const token = new web3.eth.Contract(BankTokenABI, env.tokenAddress);
 
+// await token.methods.transfer(env.bankAddress, web3.utils.toWei('1000000', 'ether'))
+// .send({
+//   from: env.bankOwnerAddress,
+//   gas: env.defaultGas,
+//   type: '0x0'
+// });
+
 // Add bank owner to wallet if private key is available
 if (env.bankOwnerPrivateKey) {
   web3.eth.accounts.wallet.add(env.bankOwnerPrivateKey);

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { deposit, withdraw, transfer } from '../controllers/transactionController.js';
+import { deposit, withdraw, transfer, getTransactionHistory } from '../controllers/transactionController.js';
 
 const router = Router();
 
@@ -75,7 +75,7 @@ router.post('/deposit', deposit);
  *               amount:
  *                 type: string
  *                 description: Amount of tokens to withdraw
- *               privateKey:
+ *               share:
  *                 type: string
  *                 description: Private key for transaction signing
  *     responses:
@@ -107,6 +107,7 @@ router.post('/withdraw', withdraw);
  *               - fromAddress
  *               - toAddress
  *               - amount
+ *               - share
  *             properties:
  *               fromAddress:
  *                 type: string
@@ -117,7 +118,7 @@ router.post('/withdraw', withdraw);
  *               amount:
  *                 type: string
  *                 description: Amount of tokens to transfer
- *               privateKey:
+ *               share:
  *                 type: string
  *                 description: Private key for transaction signing
  *     responses:

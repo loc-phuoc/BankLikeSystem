@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getHealthStatus } from '../controllers/healthController.js';
+import { getHealthStatus, fundBankFromOwner } from '../controllers/healthController.js';
 
 const router = Router();
 
@@ -44,5 +44,54 @@ const router = Router();
  *                       example: BNK
  */
 router.get('/health', getHealthStatus);
+
+/**
+ * @swagger
+ * /health/fund:
+ *   get:
+ *     summary: Fund bank contract with tokens
+ *     description: Transfers tokens from the bank owner address to the bank contract
+ *     tags: [System]
+ *     parameters:
+ *       - in: query
+ *         name: amount
+ *         schema:
+ *           type: string
+ *         description: Amount of tokens to transfer (optional, defaults to 1000)
+ *     responses:
+ *       200:
+ *         description: Funding successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Successfully funded bank contract with 1000 BNK
+ *                 transaction:
+ *                   type: string
+ *                   example: 0x1234...abcd
+ *                 bankBalance:
+ *                   type: string
+ *                   example: 5000.0
+ *       500:
+ *         description: Funding failed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: string
+ *                   example: Failed to fund bank contract
+ */
+router.get('/health/fund', fundBankFromOwner);
 
 export default router;
